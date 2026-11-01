@@ -49,7 +49,7 @@ export function SideBarUser({ name, email, profileName }: SideBarUserProps) {
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{name}</span>
-              <span className="truncate text-xs text-muted-foreground">
+              <span className="truncate text-xs text-sidebar-foreground/70">
                 {profileName ?? email}
               </span>
             </div>
@@ -87,10 +87,10 @@ export function SideBarUserSkeleton() {
   return (
     <SidebarMenu>
       <SidebarMenuItem className="flex h-12 items-center gap-2 p-2">
-        <Skeleton className="size-8 rounded-lg" />
+        <Skeleton className="size-8 rounded-lg bg-sidebar-accent" />
         <div className="grid flex-1 gap-1">
-          <Skeleton className="h-3.5 w-3/4" />
-          <Skeleton className="h-3 w-1/2" />
+          <Skeleton className="h-3.5 w-3/4 bg-sidebar-accent" />
+          <Skeleton className="h-3 w-1/2 bg-sidebar-accent" />
         </div>
       </SidebarMenuItem>
     </SidebarMenu>

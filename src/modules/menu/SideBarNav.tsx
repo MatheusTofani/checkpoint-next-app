@@ -59,8 +59,8 @@ export function SideBarNavSkeleton() {
       <SidebarMenu>
         {["70%", "55%", "80%", "60%", "75%"].map((width, index) => (
           <SidebarMenuItem key={index} className="flex h-8 items-center gap-2 px-2">
-            <Skeleton className="size-4 rounded-md" />
-            <Skeleton className="h-4 flex-1" style={{ maxWidth: width }} />
+            <Skeleton className="size-4 rounded-md bg-sidebar-accent" />
+            <Skeleton className="h-4 flex-1 bg-sidebar-accent" style={{ maxWidth: width }} />
           </SidebarMenuItem>
         ))}
       </SidebarMenu>
