@@ -26,8 +26,9 @@ import {
 import { Input } from "@/src/components/ui/input";
 import { Spinner } from "@/src/components/ui/spinner";
 import { Textarea } from "@/src/components/ui/textarea";
+import { ProductImageInput, validateProductImage } from "./ProductImageInput";
 
-type FieldErrors = Partial<Record<keyof CreateProductRequest, string>>;
+type FieldErrors = Partial<Record<keyof CreateProductRequest | "image", string>>;
 
 function parseForm(formData: FormData) {
   const request: CreateProductRequest = {
@@ -52,25 +53,57 @@ function parseForm(formData: FormData) {
 export function CreateProductDialog() {
   const [open, setOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const { CreateProduct } = useProductApi();
+  const [image, setImage] = useState<File | null>(null);
+  // Produto já criado cujo upload da imagem falhou: o próximo envio só tenta a imagem
+  const [createdProductId, setCreatedProductId] = useState<string | null>(null);
+  const { CreateProduct, UploadProductImage } = useProductApi();
   const createProduct = CreateProduct();
+  const uploadImage = UploadProductImage();
+  const isPending = createProduct.isPending || uploadImage.isPending;
 
   const handleOpenChange = (value: boolean) => {
     setOpen(value);
     if (!value) {
       setFieldErrors({});
+      setImage(null);
+      setCreatedProductId(null);
       createProduct.reset();
+      uploadImage.reset();
     }
+  };
+
+  const handleImageChange = (file: File | null) => {
+    setImage(file);
+    setFieldErrors((errors) => ({
+      ...errors,
+      image: file ? validateProductImage(file) : undefined,
+    }));
+  };
+
+  const upload = (id: string, file: File) => {
+    uploadImage.mutate(
+      { id, image: file },
+      {
+        onSuccess: () => handleOpenChange(false),
+        onError: () => setCreatedProductId(id),
+      }
+    );
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (createdProductId && image) return upload(createdProductId, image);
+
     const { request, errors } = parseForm(new FormData(event.currentTarget));
+    if (image) errors.image = validateProductImage(image);
     setFieldErrors(errors);
-    if (Object.keys(errors).length) return;
+    if (Object.values(errors).some(Boolean)) return;
 
     createProduct.mutate(request, {
-      onSuccess: () => handleOpenChange(false),
+      onSuccess: (product) => {
+        if (image) upload(product.id, image);
+        else handleOpenChange(false);
+      },
     });
   };
 
@@ -80,7 +113,7 @@ export function CreateProductDialog() {
         <PlusIcon data-icon="inline-start" />
         Novo produto
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-md">
         <form onSubmit={handleSubmit} noValidate className="grid gap-4">
           <DialogHeader>
             <DialogTitle>Novo produto</DialogTitle>
@@ -97,6 +130,27 @@ export function CreateProductDialog() {
                 </AlertDescription>
               </Alert>
             )}
+
+            {uploadImage.isError && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  O produto foi criado, mas a imagem não foi enviada:{" "}
+                  {getApiErrorMessage(uploadImage.error, "erro inesperado")}. Tente
+                  novamente ou feche para cadastrar sem imagem.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <Field data-invalid={!!fieldErrors.image}>
+              <FieldLabel>Imagem (opcional)</FieldLabel>
+              <ProductImageInput
+                value={image}
+                onChange={handleImageChange}
+                invalid={!!fieldErrors.image}
+                disabled={isPending}
+              />
+              <FieldError>{fieldErrors.image}</FieldError>
+            </Field>
 
             <Field data-invalid={!!fieldErrors.name}>
               <FieldLabel htmlFor="product-name">Nome</FieldLabel>
@@ -138,9 +192,9 @@ export function CreateProductDialog() {
 
           <DialogFooter>
             <DialogClose render={<Button variant="outline" />}>Cancelar</DialogClose>
-            <Button type="submit" disabled={createProduct.isPending}>
-              {createProduct.isPending && <Spinner />}
-              Salvar
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Spinner />}
+              {createdProductId ? "Enviar imagem" : "Salvar"}
             </Button>
           </DialogFooter>
         </form>

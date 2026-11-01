@@ -7,12 +7,13 @@ import {
   InputGroupInput,
 } from "@/src/components/ui/input-group";
 
-interface ProductFiltersProps {
-  search: string;
-  onSearchChange: (value: string) => void;
+interface SearchInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
 }
 
-export function ProductFilters({ search, onSearchChange }: ProductFiltersProps) {
+export function SearchInput({ value, onChange, placeholder }: SearchInputProps) {
   return (
     <InputGroup className="sm:max-w-xs">
       <InputGroupAddon>
@@ -20,10 +21,10 @@ export function ProductFilters({ search, onSearchChange }: ProductFiltersProps) 
       </InputGroupAddon>
       <InputGroupInput
         type="search"
-        placeholder="Buscar por nome"
-        aria-label="Buscar produtos por nome"
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
       />
     </InputGroup>
   );

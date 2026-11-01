@@ -1,4 +1,6 @@
-import { PackageIcon } from "lucide-react";
+"use client";
+
+import { useState } from "react";
 import type { ProductResponse } from "@/src/api/routes/product/productModels";
 import { Badge } from "@/src/components/ui/badge";
 import {
@@ -11,24 +13,32 @@ import {
   CardTitle,
 } from "@/src/components/ui/card";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { formatCurrency } from "@/src/lib/format";
 import { DeleteProductDialog } from "./DeleteProductDialog";
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
+import { ProductImage } from "./ProductImage";
+import { UploadProductImageDialog } from "./UploadProductImageDialog";
 
 interface ProductCardProps {
   product: ProductResponse;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  // A API grava a imagem sempre no mesmo caminho; muda a URL após o upload
+  const [imageVersion, setImageVersion] = useState<number>();
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-          <PackageIcon className="size-5" />
+    <Card className="pt-0">
+      <div className="relative aspect-video border-b">
+        <ProductImage product={product} version={imageVersion} />
+        <div className="absolute top-2 right-2">
+          <UploadProductImageDialog
+            product={product}
+            onUploaded={() => setImageVersion(Date.now())}
+          />
         </div>
+      </div>
+
+      <CardHeader>
         <CardTitle className="line-clamp-1">{product.name}</CardTitle>
         <CardDescription>{product.brand}</CardDescription>
         <CardAction>
@@ -47,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className="truncate">{product.category}</span>
         </Badge>
         <span className="text-base font-semibold tabular-nums">
-          {currencyFormatter.format(product.price)}
+          {formatCurrency(product.price)}
         </span>
       </CardFooter>
     </Card>
@@ -56,9 +66,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
 export function ProductCardSkeleton() {
   return (
-    <Card>
+    <Card className="pt-0">
+      <Skeleton className="aspect-video rounded-none" />
       <CardHeader>
-        <Skeleton className="mb-2 size-10 rounded-lg" />
         <Skeleton className="h-4 w-2/3" />
         <Skeleton className="h-3.5 w-1/3" />
       </CardHeader>

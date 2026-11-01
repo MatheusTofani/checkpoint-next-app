@@ -34,6 +34,15 @@ export function useProductApi() {
         });
     }
 
+    const UploadProductImage = () => {
+        return useMutation({
+            mutationFn: async ({ id, image }: { id: string; image: File }) => (await productApi.uploadProductImage(id, image)).data,
+            onSuccess: async () => {
+                await queryClient.invalidateQueries({ queryKey: productQueryKey });
+            },
+        });
+    }
+
     const DeleteProduct = () => {
         return useMutation({
             mutationFn: (id: string) => productApi.deleteProduct(id),
@@ -43,5 +52,5 @@ export function useProductApi() {
         });
     }
 
-    return { GetProducts, GetProductById, CreateProduct, DeleteProduct };
+    return { GetProducts, GetProductById, CreateProduct, UploadProductImage, DeleteProduct };
 }

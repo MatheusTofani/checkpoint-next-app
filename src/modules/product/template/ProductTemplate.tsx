@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
+import { PackageOpenIcon } from "lucide-react";
 import { getApiErrorMessage } from "@/src/api/api";
 import { useProductApi } from "@/src/api/routes/product/useProductApi";
 import { Alert, AlertDescription } from "@/src/components/ui/alert";
 import { useDebounce } from "@/src/hooks/use-debounce";
-import { cn } from "@/src/lib/utils";
+import { CardGrid } from "@/src/modules/common/components/CardGrid";
+import { ListEmpty } from "@/src/modules/common/components/ListEmpty";
+import { ListPagination } from "@/src/modules/common/components/ListPagination";
+import { PageHeader } from "@/src/modules/common/components/PageHeader";
+import { SearchInput } from "@/src/modules/common/components/SearchInput";
 import { CreateProductDialog } from "../components/CreateProductDialog";
 import { ProductCard, ProductCardSkeleton } from "../components/ProductCard";
-import { ProductEmpty } from "../components/ProductEmpty";
-import { ProductFilters } from "../components/ProductFilters";
-import { ProductPagination } from "../components/ProductPagination";
 
 const PAGE_SIZE = 12;
 
@@ -33,17 +35,17 @@ export default function ProductTemplate() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Produtos</h1>
-          <p className="text-sm text-muted-foreground">
-            Gerencie o catálogo de produtos
-          </p>
-        </div>
-        <CreateProductDialog />
-      </div>
+      <PageHeader
+        title="Produtos"
+        description="Gerencie o catálogo de produtos"
+        action={<CreateProductDialog />}
+      />
 
-      <ProductFilters search={search} onSearchChange={handleSearchChange} />
+      <SearchInput
+        value={search}
+        onChange={handleSearchChange}
+        placeholder="Buscar por nome"
+      />
 
       {isError ? (
         <Alert variant="destructive">
@@ -52,42 +54,35 @@ export default function ProductTemplate() {
           </AlertDescription>
         </Alert>
       ) : isPending ? (
-        <ProductGrid>
+        <CardGrid>
           {Array.from({ length: 8 }, (_, index) => (
             <ProductCardSkeleton key={index} />
           ))}
-        </ProductGrid>
+        </CardGrid>
       ) : data.items.length === 0 ? (
-        <ProductEmpty search={debouncedSearch} />
+        <ListEmpty
+          icon={PackageOpenIcon}
+          title="Nenhum produto encontrado"
+          description={
+            debouncedSearch
+              ? `Nenhum resultado para "${debouncedSearch}". Tente outro nome.`
+              : "Cadastre o primeiro produto pelo botão \"Novo produto\"."
+          }
+        />
       ) : (
         <>
-          <ProductGrid className={isPlaceholderData ? "opacity-60" : undefined}>
+          <CardGrid stale={isPlaceholderData}>
             {data.items.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </ProductGrid>
-          <ProductPagination pageInfo={data.pageInfo} onPageChange={setPage} />
+          </CardGrid>
+          <ListPagination
+            pageInfo={data.pageInfo}
+            onPageChange={setPage}
+            itemLabel={["produto", "produtos"]}
+          />
         </>
       )}
-    </div>
-  );
-}
-
-function ProductGrid({
-  className,
-  children,
-}: {
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className={cn(
-        "grid gap-4 transition-opacity sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
-        className
-      )}
-    >
-      {children}
     </div>
   );
 }

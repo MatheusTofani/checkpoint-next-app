@@ -19,18 +19,12 @@ import {
   useSidebar,
 } from "@/src/components/ui/sidebar";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { getInitials } from "@/src/lib/format";
 
 export interface SideBarUserProps {
   name: string;
   email: string;
   profileName?: string;
-}
-
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
 }
 
 export function SideBarUser({ name, email, profileName }: SideBarUserProps) {

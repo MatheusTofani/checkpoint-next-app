@@ -4,21 +4,20 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { PageInfoResponse } from "@/src/api/routes/common/commonModels";
 import { Button } from "@/src/components/ui/button";
 
-interface ProductPaginationProps {
+interface ListPaginationProps {
   pageInfo: PageInfoResponse;
   onPageChange: (page: number) => void;
+  /** Nome do item no singular e no plural, ex.: ["produto", "produtos"]. */
+  itemLabel: [singular: string, plural: string];
 }
 
-export function ProductPagination({ pageInfo, onPageChange }: ProductPaginationProps) {
+export function ListPagination({ pageInfo, onPageChange, itemLabel }: ListPaginationProps) {
   const totalPages = Math.max(1, Math.ceil(pageInfo.total / pageInfo.pageSize));
 
   return (
-    <nav
-      aria-label="Paginação de produtos"
-      className="flex items-center justify-between gap-2"
-    >
+    <nav aria-label="Paginação" className="flex items-center justify-between gap-2">
       <p className="text-sm text-muted-foreground">
-        {pageInfo.total} {pageInfo.total === 1 ? "produto" : "produtos"}
+        {pageInfo.total} {pageInfo.total === 1 ? itemLabel[0] : itemLabel[1]}
       </p>
       <div className="flex items-center gap-2">
         <Button
