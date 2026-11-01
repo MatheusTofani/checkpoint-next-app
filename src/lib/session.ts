@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import type {
   AuthenticatedProfile,
   AuthenticatedUser,
-} from "@/src/api/auth";
+} from "@/src/api/routes/authentication/authenticationModels";
 
 export const SESSION_COOKIE = "checkpoint_session";
 

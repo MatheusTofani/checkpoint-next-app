@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getApiErrorMessage } from "@/src/api/api";
-import { authenticate } from "@/src/api/auth";
+import { AuthenticationApi } from "@/src/api/routes/authentication/authenticationApi";
 import { createSession, deleteSession } from "@/src/lib/session";
 
 export type LoginState = {
@@ -24,7 +24,7 @@ export async function login(
   if (fieldErrors.email || fieldErrors.password) return { email, fieldErrors };
 
   try {
-    const response = await authenticate({ email, password });
+    const { data: response } = await new AuthenticationApi().login({ email, password });
     await createSession({
       token: response.token,
       expiresAt: response.expiresAt,
